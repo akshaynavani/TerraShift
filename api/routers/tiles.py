@@ -68,10 +68,9 @@ def preview(
         arr = to_rgb_uint8(after)
     elif which.endswith("_diff") and which[:-5] in INDEX_FUNCS:
         fn = INDEX_FUNCS[which[:-5]]
-        d = np.clip((fn(after) - fn(before)) / 1.0, -1, 1)
+        d = np.clip(fn(after) - fn(before), -1, 1)
         # diverging red (decrease) / white / blue (increase)
         pos, neg = np.clip(d, 0, 1), np.clip(-d, 0, 1)
-        arr = np.stack([1 - pos, 1 - pos - neg + neg, 1 - neg], axis=-1)
         arr = np.stack([1 - pos, 1 - np.maximum(pos, neg), 1 - neg], axis=-1)
         arr = (arr * 255).astype(np.uint8)
     else:
