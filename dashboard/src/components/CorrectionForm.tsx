@@ -29,6 +29,22 @@ export function CorrectionForm({ classes, prediction, analyst, onAnalyst, onSubm
     }
   };
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") return;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 1 && n <= classes.length) {
+        setLabel(classes[n - 1]);
+      } else if (e.key === "Enter" && analyst && !busy) {
+        e.preventDefault();
+        void submit();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   const isCorrection = prediction !== null && label !== prediction.label;
 
   return (
