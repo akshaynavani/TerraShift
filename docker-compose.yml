@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-terrashift}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-terrashift}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-terrashift}"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-terrashift}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-terrashift}
+      TERRASHIFT_ARTIFACT_DIR: /app/artifacts
+      TERRASHIFT_IMAGERY_ROOT: /app/data
+      CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        VITE_API_URL: http://localhost:8000
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
