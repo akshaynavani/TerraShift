@@ -11,7 +11,7 @@ review predictions and submit correction labels that feed back into retraining.
 
 - **ResNet-50 (PyTorch):** bi-temporal early fusion. Both dates' 6 bands are stacked into a 12-channel
   input. The first conv is widened, and the ImageNet RGB filters are reused for the red/green/blue channels.
-- **Random Forest (scikit-learn):** about 150 hand-crafted features. These include per-band deltas;
+- **Random Forest (scikit-learn):** 99 hand-crafted features. These include per-band deltas;
   NDVI, NDWI, NDBI and NBR statistics before, after and as a delta; fractions of pixels crossing change
   thresholds; and the change-vector-analysis magnitude.
 - **Ensemble:** a weighted average of both models' probabilities (CNN 0.6 / RF 0.4).
